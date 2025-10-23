@@ -1,0 +1,69 @@
+image:
+  repository: quay.io/keycloak/keycloak
+  tag: "26.0.5"
+
+# Admin credentials
+extraEnv: |
+  - name: KEYCLOAK_ADMIN
+    value: admin
+  - name: KEYCLOAK_ADMIN_PASSWORD
+    value: Heslo123!
+  - name: KC_DB
+    value: postgres
+  - name: KC_DB_URL
+    value: "jdbc:postgresql://db-postgresql-sgp1-67015-do-user-27523279-0.d.db.ondigitalocean.com:25060/defaultdb?ssl=true&sslmode=require&currentSchema=keycloak"
+  - name: KC_DB_USERNAME
+    value: keycloak_user
+  - name: KC_DB_PASSWORD
+    value: strong-pass
+  - name: KC_HTTP_RELATIVE_PATH
+    value: /keycloak
+  - name: KC_PROXY_HEADERS
+    value: xforwarded
+  - name: KC_PROXY
+    value: edge
+  - name: KC_HOSTNAME
+    value: "137.184.251.239"
+  - name: KC_HOSTNAME_STRICT
+    value: "false"
+  - name: KC_HOSTNAME_STRICT_HTTPS
+    value: "false"
+  - name: KC_HTTP_ENABLED
+    value: "true"
+  - name: KC_DB_SCHEMA
+    value: "keycloak"
+
+# Command to start Keycloak
+command:
+  - "/opt/keycloak/bin/kc.sh"
+  - "start"
+  - "--hostname-strict=false"
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+
+# Disable PostgreSQL (using external DB)
+postgresql:
+  enabled: false
+
+# Health checks - using TCP probes since HTTP health endpoints are not available
+livenessProbe: |
+  tcpSocket:
+    port: http
+  initialDelaySeconds: 120
+  periodSeconds: 10
+  
+readinessProbe: |
+  tcpSocket:
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+startupProbe: |
+  tcpSocket:
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 5
+  failureThreshold: 60

@@ -1,0 +1,88 @@
+image:
+  registry: quay.io
+  repository: keycloak/keycloak
+  tag: "26.0.5"
+
+# Disable init containers (not compatible with official Keycloak image)
+initContainers: []
+
+# Disable volume copying (not needed for official image)
+volumesPermissions:
+  enabled: false
+
+auth:
+  adminUser: admin
+  adminPassword: "Heslo123!"
+
+postgresql:
+  enabled: false
+
+externalDatabase:
+  host: "db-postgresql-sgp1-67015-do-user-27523279-0.d.db.ondigitalocean.com"
+  port: 25060
+  user: "keycloak_user"
+  password: "strong-pass"
+  database: "defaultdb"
+
+extraEnvVars:
+  # Quarkus/Keycloak (modern) vars ONLY
+  - name: KC_DB
+    value: "postgres"
+  - name: KC_DB_URL_HOST
+    value: "db-postgresql-sgp1-67015-do-user-27523279-0.d.db.ondigitalocean.com"
+  - name: KC_DB_URL_PORT
+    value: "25060"
+  - name: KC_DB_URL_DATABASE
+    value: "defaultdb"
+  - name: KC_DB_USERNAME
+    value: "keycloak_user"
+  - name: KC_DB_PASSWORD
+    value: "strong-pass"
+  - name: KC_DB_URL_PROPERTIES
+    value: "ssl=true&sslmode=require"
+
+  # Run under /keycloak and behind an ingress/proxy
+  - name: KC_HTTP_RELATIVE_PATH
+    value: "/keycloak"
+  - name: KC_PROXY_HEADERS
+    value: "xforwarded"
+  - name: KC_PROXY
+    value: "edge"
+
+  # Public hostname+path (using IP address)
+  - name: KC_HOSTNAME
+    value: "137.184.251.239"
+  - name: KC_HOSTNAME_PATH
+    value: "/keycloak"
+  - name: KC_HOSTNAME_STRICT
+    value: "false"
+  - name: KC_HOSTNAME_STRICT_HTTPS
+    value: "false"
+
+  # Enable HTTP at the pod (TLS ends at ingress), but public is HTTPS
+  - name: KC_HTTP_ENABLED
+    value: "true"
+
+readinessProbe:
+  enabled: false
+
+customReadinessProbe:
+  httpGet:
+    path: /keycloak/health/ready
+    port: http
+    scheme: HTTP
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+
+proxy:
+  enabled: true
+  headers: xforwarded
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false   # we’ll manage ingress separately
