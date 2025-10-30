@@ -26,9 +26,11 @@ spec:
               valueFrom: { secretKeyRef: { name: db-creds, key: password } }
             - name: SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA
               value: "app"
-            # Disable OAuth2 autoconfiguration - security is handled in SecurityConfig
-            # - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
-            #   value: "http://your-keycloak-url/realms/cool-corners"
+            # Keycloak OAuth2 Configuration
+            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
+              value: "https://coolcorners.org/keycloak/realms/cool-corners"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
 
           readinessProbe:
             tcpSocket:

@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: keycloak
+  name: keycloak-coolcorners
   namespace: keycloak
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
@@ -9,12 +9,13 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
 spec:
   ingressClassName: nginx
-  # TLS disabled for IP-based access
-  # tls:
-  #   - hosts: [137.184.251.239]
-  #     secretName: your-domain-tls
+  tls:
+    - hosts:
+        - coolcorners.org
+      secretName: coolcorners-keycloak-tls
   rules:
-    - http:
+    - host: coolcorners.org
+      http:
         paths:
           - path: /keycloak
             pathType: Prefix

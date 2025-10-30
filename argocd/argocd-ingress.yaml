@@ -1,18 +1,21 @@
-# argocd-ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: argocd
+  name: argocd-coolcorners
   namespace: argocd
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-http01
+    cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
   ingressClassName: nginx
   tls:
-    - hosts: [argocd.example.com]
-      secretName: argocd-tls
+    - hosts:
+        - argocd.coolcorners.org
+      secretName: coolcorners-argocd-tls
   rules:
-    - host: argocd.example.com
+    - host: argocd.coolcorners.org
       http:
         paths:
           - path: /
@@ -21,4 +24,4 @@ spec:
               service:
                 name: argocd-server
                 port:
-                  number: 80
+                  number: 443

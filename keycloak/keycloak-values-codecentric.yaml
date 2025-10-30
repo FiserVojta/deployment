@@ -23,7 +23,7 @@ extraEnv: |
   - name: KC_PROXY
     value: edge
   - name: KC_HOSTNAME
-    value: "137.184.251.239"
+    value: "coolcorners.org"
   - name: KC_HOSTNAME_STRICT
     value: "false"
   - name: KC_HOSTNAME_STRICT_HTTPS

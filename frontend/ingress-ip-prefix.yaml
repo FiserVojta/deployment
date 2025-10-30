@@ -1,14 +1,20 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: frontend-ip-root
+  name: frontend-coolcorners
   namespace: app
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"   # HTTP for IP testing
+    cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - coolcorners.org
+      secretName: coolcorners-app-tls
   rules:
-    - http:
+    - host: coolcorners.org
+      http:
         paths:
           - path: /
             pathType: Prefix
