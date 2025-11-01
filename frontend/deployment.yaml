@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: ghcr.io/fiservojta/coolcornersangular:0.0.2-3c0caa7
+          image: ghcr.io/fiservojta/coolcornersangular:0.0.3-c0e945b
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
