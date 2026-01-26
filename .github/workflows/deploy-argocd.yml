@@ -12,6 +12,9 @@ on:
 jobs:
   trigger-argocd-sync:
     runs-on: ubuntu-latest
+    env:
+      ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+      ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,38 +25,32 @@ jobs:
           sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
           rm argocd-linux-amd64
 
-      - name: Login to ArgoCD
-        env:
-          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
-          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+      - name: Verify ArgoCD access
         run: |
-          argocd app list --server $ARGOCD_SERVER --auth-token $ARGOCD_AUTH_TOKEN --insecure
+          set -euo pipefail
+          : "${ARGOCD_SERVER:?ARGOCD_SERVER is not set}"
+          : "${ARGOCD_AUTH_TOKEN:?ARGOCD_AUTH_TOKEN is not set}"
+          argocd app list --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
 
       - name: Sync Backend App
         if: contains(github.event.head_commit.modified, 'backend/') || contains(github.event.head_commit.added, 'backend/')
-        env:
-          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
-          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
         run: |
-          argocd app sync coolcorners-backend --server $ARGOCD_SERVER --auth-token $ARGOCD_AUTH_TOKEN --insecure
-          argocd app wait coolcorners-backend --server $ARGOCD_SERVER --auth-token $ARGOCD_AUTH_TOKEN --insecure
+          set -euo pipefail
+          argocd app sync coolcorners-backend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
+          argocd app wait coolcorners-backend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
 
       - name: Sync Frontend App
         if: contains(github.event.head_commit.modified, 'frontend/') || contains(github.event.head_commit.added, 'frontend/')
-        env:
-          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
-          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
         run: |
-          argocd app sync coolcorners-frontend --server $ARGOCD_SERVER --auth-token $ARGOCD_AUTH_TOKEN --insecure
-          argocd app wait coolcorners-frontend --server $ARGOCD_SERVER --auth-token $ARGOCD_AUTH_TOKEN --insecure
+          set -euo pipefail
+          argocd app sync coolcorners-frontend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
+          argocd app wait coolcorners-frontend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
 
       - name: Sync All Apps (if other files changed)
         if: |
           !contains(github.event.head_commit.modified, 'backend/') && 
           !contains(github.event.head_commit.modified, 'frontend/')
-        env:
-          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
-          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
         run: |
-          argocd app sync coolcorners-backend --server $ARGOCD_SERVER --auth-token $ARGOCD_AUTH_TOKEN --insecure
-          argocd app sync coolcorners-frontend --server $ARGOCD_SERVER --auth-token $ARGOCD_AUTH_TOKEN --insecure
+          set -euo pipefail
+          argocd app sync coolcorners-backend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
+          argocd app sync coolcorners-frontend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
