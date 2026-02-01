@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/fiservojta/coolcorners-be:0.0.12-d62fe7c
+          image: ghcr.io/fiservojta/coolcorners-be:0.0.13-6bb7628
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
