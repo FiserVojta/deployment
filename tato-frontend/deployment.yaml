@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tato-frontend
+  namespace: tato
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tato-frontend
+  template:
+    metadata:
+      labels:
+        app: tato-frontend
+    spec:
+      containers:
+        - name: tato-frontend
+          image: ghcr.io/fiservojta/tato-fe:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 128Mi

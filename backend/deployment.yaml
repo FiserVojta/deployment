@@ -21,9 +21,9 @@ spec:
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://db-postgresql-sgp1-67015-do-user-27523279-0.d.db.ondigitalocean.com:25060/defaultdb?sslmode=require&currentSchema=app,public"
             - name: SPRING_DATASOURCE_USERNAME
-              valueFrom: { secretKeyRef: { name: db-creds, key: username } }
+              valueFrom: { secretKeyRef: { name: db-creds, key: db-username } }
             - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom: { secretKeyRef: { name: db-creds, key: password } }
+              valueFrom: { secretKeyRef: { name: db-creds, key: db-password } }
             - name: SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA
               value: "app"
             # Keycloak OAuth2 Configuration

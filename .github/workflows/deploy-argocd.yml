@@ -8,6 +8,9 @@ on:
       - 'backend/**'
       - 'frontend/**'
       - 'keycloak/**'
+      - 'tato-backend/**'
+      - 'tato-frontend/**'
+      - 'argocd/**'
 
 jobs:
   trigger-argocd-sync:
@@ -46,11 +49,29 @@ jobs:
           argocd app sync coolcorners-frontend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
           argocd app wait coolcorners-frontend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
 
+      - name: Sync Tato Backend App
+        if: contains(github.event.head_commit.modified, 'tato-backend/') || contains(github.event.head_commit.added, 'tato-backend/') || contains(github.event.head_commit.modified, 'argocd/tato-backend-app.yaml') || contains(github.event.head_commit.added, 'argocd/tato-backend-app.yaml')
+        run: |
+          set -euo pipefail
+          argocd app sync tato-backend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
+          argocd app wait tato-backend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
+
+      - name: Sync Tato Frontend App
+        if: contains(github.event.head_commit.modified, 'tato-frontend/') || contains(github.event.head_commit.added, 'tato-frontend/') || contains(github.event.head_commit.modified, 'argocd/tato-frontend-app.yaml') || contains(github.event.head_commit.added, 'argocd/tato-frontend-app.yaml')
+        run: |
+          set -euo pipefail
+          argocd app sync tato-frontend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
+          argocd app wait tato-frontend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
+
       - name: Sync All Apps (if other files changed)
         if: |
-          !contains(github.event.head_commit.modified, 'backend/') && 
-          !contains(github.event.head_commit.modified, 'frontend/')
+          !contains(github.event.head_commit.modified, 'backend/') &&
+          !contains(github.event.head_commit.modified, 'frontend/') &&
+          !contains(github.event.head_commit.modified, 'tato-backend/') &&
+          !contains(github.event.head_commit.modified, 'tato-frontend/')
         run: |
           set -euo pipefail
           argocd app sync coolcorners-backend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
           argocd app sync coolcorners-frontend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
+          argocd app sync tato-backend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
+          argocd app sync tato-frontend --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_AUTH_TOKEN" --insecure
