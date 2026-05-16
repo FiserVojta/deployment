@@ -20,9 +20,11 @@ spec:
           env:
             - name: VITE_API_URL
               value: "https://coolcorners.org/api"
-            # Vite reads this at image build time; rebuilding the frontend image is required for changes to take effect.
             - name: VITE_MAPY_API_KEY
-              value: "CiCKYEBj4BYl5ylORo2j4nIa2ijTtSH2joKhYdCSPKs"
+              valueFrom:
+                secretKeyRef:
+                  name: frontend-runtime
+                  key: VITE_MAPY_API_KEY
           readinessProbe:
             httpGet: { path: /, port: 80 }
             initialDelaySeconds: 5
