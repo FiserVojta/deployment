@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: ghcr.io/fiservojta/coolcornersreact:0.0.40-fcbdd06
+          image: ghcr.io/fiservojta/coolcornersreact:0.0.41-7ee895b
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
