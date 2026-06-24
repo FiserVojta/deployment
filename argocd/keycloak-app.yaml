@@ -31,10 +31,13 @@ spec:
           - "--hostname-strict=false"
           - "--http-relative-path=/keycloak"
           - "--proxy-headers=xforwarded"
+          - "--cache=local" # single replica → no Infinispan/JGroups clustering
 
-        # Wait for the database to be reachable before starting Keycloak.
+        # dbchecker (DB-wait init container) requires the chart's structured
+        # database.* values; we configure the DB via extraEnv below instead, so
+        # leave it off. Keycloak retries the DB connection itself on startup.
         dbchecker:
-          enabled: true
+          enabled: false
 
         extraEnv: |
           - name: KC_DB
