@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: coolcorners-root
+  namespace: argocd
+spec:
+  project: default
+  # App-of-apps: this single Application manages every other Application CR
+  # found in the argocd/ folder of the deployment repo (including itself).
+  source:
+    repoURL: https://github.com/FiserVojta/coolcornersdeployment.git
+    targetRevision: HEAD
+    path: argocd
+    directory:
+      recurse: false # all *-app.yaml manifests live flat in argocd/
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
