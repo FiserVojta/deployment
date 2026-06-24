@@ -11,6 +11,8 @@ spec:
     metadata:
       labels: { app: api }
     spec:
+      imagePullSecrets:
+        - name: ghcr-creds
       containers:
         - name: api
           image: ghcr.io/fiservojta/coolcorners-be:0.0.42-8f67b9a

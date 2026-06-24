@@ -11,6 +11,8 @@ spec:
     metadata:
       labels: { app: frontend }
     spec:
+      imagePullSecrets:
+        - name: ghcr-creds
       containers:
         - name: web
           image: ghcr.io/fiservojta/coolcornersreact:0.0.41-7ee895b
