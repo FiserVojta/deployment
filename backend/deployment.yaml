@@ -15,7 +15,7 @@ spec:
         - name: ghcr-creds
       containers:
         - name: api
-          image: ghcr.io/fiservojta/coolcorners-be:0.0.46-7b191f3
+          image: ghcr.io/fiservojta/coolcorners-be:0.0.47-faec2a6
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
