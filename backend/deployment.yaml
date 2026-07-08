@@ -44,6 +44,10 @@ spec:
               value: "https://coolcorners.org/keycloak/realms/cool-corners"
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
+            # Without an explicit cap the JVM sizes the heap at 25% of the container limit
+            # (~128Mi), which is too small for image processing during file uploads.
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:MaxRAMPercentage=75.0"
 
           readinessProbe:
             tcpSocket:
