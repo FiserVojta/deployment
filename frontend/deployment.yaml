@@ -15,7 +15,7 @@ spec:
         - name: ghcr-creds
       containers:
         - name: web
-          image: ghcr.io/fiservojta/coolcornersreact:0.0.47-869b247
+          image: ghcr.io/fiservojta/coolcornersreact:0.0.48-45c30d2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
