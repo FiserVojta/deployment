@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: coolcorners-app
+  namespace: argocd
+spec:
+  project: default
+  # Backend and frontend are deployed as one unit: same repo, same target
+  # namespace, and their manifests are versioned together. Multi-source keeps
+  # the existing backend/ and frontend/ directory layout intact.
+  sources:
+    - repoURL: https://github.com/FiserVojta/coolcornersdeployment.git
+      targetRevision: HEAD
+      path: backend
+    - repoURL: https://github.com/FiserVojta/coolcornersdeployment.git
+      targetRevision: HEAD
+      path: frontend
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

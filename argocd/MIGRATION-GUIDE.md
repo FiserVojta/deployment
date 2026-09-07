@@ -31,18 +31,14 @@ git push -u origin main
 
 ### 2. Update ArgoCD Application Files
 
-Edit these files and replace `YOURUSERNAME` with your actual GitHub username:
-- `argocd/backend-app.yaml`
-- `argocd/frontend-app.yaml`
+Edit this file and replace `YOURUSERNAME` with your actual GitHub username:
+- `argocd/coolcorners-app.yaml`
 
 ### 3. Apply ArgoCD Applications
 
 ```bash
-# Apply the backend app
-kubectl apply -f argocd/backend-app.yaml
-
-# Apply the frontend app
-kubectl apply -f argocd/frontend-app.yaml
+# Apply the app (backend + frontend, multi-source)
+kubectl apply -f argocd/coolcorners-app.yaml
 ```
 
 ### 4. Verify in ArgoCD UI
@@ -50,8 +46,7 @@ kubectl apply -f argocd/frontend-app.yaml
 Visit: https://argocd.coolcorners.org
 
 You should see:
-- coolcorners-backend
-- coolcorners-frontend
+- coolcorners-app (backend + frontend)
 
 ### 5. Delete Old kubectl-Created Resources (Optional)
 

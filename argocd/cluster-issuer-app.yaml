@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: coolcorners-cluster-issuer
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/FiserVojta/coolcornersdeployment.git
+    targetRevision: HEAD
+    # cluster-issuer.yaml lives at the repo root, so scope this Application to
+    # that one file rather than sweeping in anything else added there later.
+    path: .
+    directory:
+      recurse: false
+      include: cluster-issuer.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    # ClusterIssuer is cluster-scoped; this namespace is only where Argo records
+    # the Application, and matches where cert-manager itself runs.
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

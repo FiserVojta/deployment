@@ -32,6 +32,8 @@ echo "📂 Working directory: $SCRIPT_DIR"
 echo ""
 
 # Step 1: Apply Cluster Issuer
+# Bootstrap only. Once the ArgoCD root app is running, the ClusterIssuer is
+# managed by argocd/cluster-issuer-app.yaml and this step is a no-op re-apply.
 echo "Step 1/5: Applying Cluster Issuer (Let's Encrypt)..."
 kubectl apply -f "$SCRIPT_DIR/cluster-issuer.yaml"
 echo "✅ Cluster Issuer applied"
