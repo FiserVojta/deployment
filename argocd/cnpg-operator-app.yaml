@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cnpg-operator
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://cloudnative-pg.github.io/charts
+    chart: cloudnative-pg
+    targetRevision: 0.29.0 # operator v1.30.0
+    helm:
+      releaseName: cnpg
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cnpg-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      # The CNPG CRDs are far larger than the 262144-byte limit on the
+      # last-applied-configuration annotation, so a client-side apply fails.
+      - ServerSideApply=true

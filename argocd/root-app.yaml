@@ -11,8 +11,11 @@ spec:
     repoURL: https://github.com/FiserVojta/coolcornersdeployment.git
     targetRevision: HEAD
     path: argocd
-    directory:
-      recurse: false # all *-app.yaml manifests live flat in argocd/
+    # All *-app.yaml manifests live flat in argocd/, so the default
+    # (non-recursive) directory behaviour is what we want. Do not set
+    # `directory.recurse: false` explicitly: the API server drops the zero
+    # value, so the desired manifest can never match live and the app sits
+    # permanently OutOfSync.
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

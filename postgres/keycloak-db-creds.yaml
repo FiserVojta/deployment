@@ -1,0 +1,30 @@
+apiVersion: secrets.infisical.com/v1alpha1
+kind: InfisicalSecret
+metadata:
+  name: keycloak-db-creds-sync
+  namespace: app
+spec:
+  syncConfig:
+    resyncInterval: 1m
+  authentication:
+    universalAuth:
+      secretsScope:
+        projectSlug: cool-corners-b47-r
+        envSlug: dev
+        # Same path Keycloak's own secret reads from, so KC_DB_PASSWORD stays
+        # the single source of truth across both namespaces.
+        secretsPath: /corners/keycloak
+      credentialsRef:
+        secretName: universal-auth-credentials
+        secretNamespace: infisical-system
+  managedKubeSecretReferences:
+    - secretName: keycloak-db-creds
+      secretNamespace: app
+      creationPolicy: Owner
+      # CNPG requires basic-auth for managed role passwords.
+      secretType: kubernetes.io/basic-auth
+      template:
+        includeAllSecrets: false
+        data:
+          username: keycloak
+          password: "{{ .KC_DB_PASSWORD.Value }}"

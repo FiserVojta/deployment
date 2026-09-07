@@ -1,0 +1,79 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+  namespace: app
+spec:
+  # Single instance: this cluster has one node, so replicas would buy nothing
+  # but memory pressure. Durability here comes from the retained volume and
+  # from the object-store backups below, not from replication.
+  instances: 1
+  primaryUpdateStrategy: unsupervised
+
+  # PostGIS is a hard requirement: V0.1.0.09/10/27 create GEOMETRY(Point, 4326)
+  # columns. Pin the exact tag — never track a rolling tag for a database, since
+  # a major-version jump on restart cannot start against an existing PGDATA.
+  imageName: ghcr.io/cloudnative-pg/postgis:17-3.5-9
+
+  # Needed for the dump/restore cutover (and for CREATE EXTENSION during it).
+  # Safe to set to false once the migration is finished.
+  enableSuperuserAccess: true
+
+  storage:
+    # -retain so that deleting the PVC (or this Cluster) does not destroy the
+    # underlying Scaleway block volume. This is the only copy of your data
+    # living in the cluster.
+    storageClass: sbs-default-retain
+    size: 20Gi
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+
+  postgresql:
+    parameters:
+      # Kept deliberately modest: the node is at ~52% memory before Postgres
+      # exists, and Postgres shares it with the API, Keycloak and ArgoCD.
+      shared_buffers: 256MB
+      max_connections: "100"
+
+  bootstrap:
+    initdb:
+      database: corners
+      owner: corners
+      postInitTemplateSQL:
+        # Runs against template1 before the application database is created, so
+        # both "corners" and "keycloakdb" inherit the extension.
+        - CREATE EXTENSION IF NOT EXISTS postgis;
+
+  managed:
+    roles:
+      - name: keycloak
+        login: true
+        ensure: present
+        # basic-auth secret produced by keycloak-db-creds.yaml from the same
+        # Infisical value Keycloak itself reads, so the password has one source.
+        passwordSecret:
+          name: keycloak-db-creds
+
+  backup:
+    retentionPolicy: 30d
+    barmanObjectStore:
+      # A SEPARATE, PRIVATE bucket — deliberately not the "cornersdev" bucket the
+      # app uploads to, because that one is written with public-read ACLs.
+      destinationPath: s3://coolcorners-pgbackup/
+      endpointURL: https://s3.fr-par.scw.cloud
+      s3Credentials:
+        accessKeyId:
+          name: db-creds
+          key: s3-access-key
+        secretAccessKey:
+          name: db-creds
+          key: s3-key
+      data:
+        compression: gzip
+      wal:
+        compression: gzip

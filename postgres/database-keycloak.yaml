@@ -1,0 +1,13 @@
+isapiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: keycloakdb
+  namespace: app
+spec:
+  cluster:
+    name: postgres
+  name: keycloakdb
+  owner: keycloak
+  # Keep the database if this resource is ever removed; dropping Keycloak's
+  # store on a stray prune would lose every user, realm and client.
+  databaseReclaimPolicy: retain
