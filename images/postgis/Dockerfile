@@ -5,8 +5,10 @@
 # CNPG *postgresql* images are multi-arch, so we start from one of those and
 # add PostGIS from PGDG, which does ship arm64 packages.
 #
-# The "standard" variant is required, not the "minimal" one: it carries the
-# barman-cloud tooling that spec.backup.barmanObjectStore depends on.
+# Note: the "standard" variant does NOT contain barman-cloud — CNPG removed it
+# from all operand images in favour of the Barman Cloud Plugin, which injects a
+# sidecar instead. If backups are added later, that is the route; do not expect
+# barman binaries here. "minimal" would also work for this image today.
 #
 # The base image already has the PGDG apt repository configured. Do not add it
 # again — a second entry for the same source with a different signed-by keyring

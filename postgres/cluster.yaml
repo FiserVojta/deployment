@@ -66,21 +66,8 @@ spec:
         passwordSecret:
           name: keycloak-db-creds
 
-  backup:
-    retentionPolicy: 30d
-    barmanObjectStore:
-      # A SEPARATE, PRIVATE bucket — deliberately not the "cornersdev" bucket the
-      # app uploads to, because that one is written with public-read ACLs.
-      destinationPath: s3://coolcorners-pgbackup/
-      endpointURL: https://s3.fr-par.scw.cloud
-      s3Credentials:
-        accessKeyId:
-          name: db-creds
-          key: s3-access-key
-        secretAccessKey:
-          name: db-creds
-          key: s3-key
-      data:
-        compression: gzip
-      wal:
-        compression: gzip
+  # No backups configured. The operand image does not ship barman-cloud (CNPG
+  # moved it into the Barman Cloud Plugin sidecar), and object-store backups
+  # were deliberately deferred. There is therefore NO point-in-time recovery
+  # and NO automatic backup of this database: the retained volume is the only
+  # copy. See MIGRATION.md before decommissioning the managed instance.

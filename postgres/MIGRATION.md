@@ -8,11 +8,6 @@ Nothing repoints at it until step 5, so steps 1–4 are safe to do at any time.
 
 ## Step 0 — Prerequisites (do these first)
 
-**Create a private backup bucket.** `cluster.yaml` writes backups to
-`s3://coolcorners-pgbackup/`, deliberately NOT the `cornersdev` bucket the app
-uploads to — that one is written with public-read ACLs and must not hold
-database backups. Create it in Scaleway (region `fr-par`), private.
-
 **Confirm the source version.** The target image is Postgres 17 / PostGIS 3.5.
 A dump only restores forward, so the source must be 17 or older:
 
@@ -53,7 +48,6 @@ Wait for phase `Cluster in healthy state`.
 ```bash
 kubectl -n app exec -it postgres-1 -- psql -c "\l"          # corners + keycloakdb
 kubectl -n app exec -it postgres-1 -- psql -d corners -c "select postgis_version()"
-kubectl -n app get backup                                    # first backup ran
 ```
 
 If `keycloakdb` is missing, check the `Database` resource and that
@@ -149,14 +143,22 @@ Then log in through the UI — that exercises Keycloak's database end to end.
 
 ## Step 7 — Decommission
 
-Only after a full day of clean running, and after confirming a backup exists:
+**Read this before deleting anything.** There are no backups configured, so
+once the managed instance is gone the only copy of your data is the single
+Scaleway volume behind `postgres-1`. There is no point-in-time recovery and
+nothing to restore from if that volume is lost or the data is corrupted.
+
+At minimum, before decommissioning:
 
 ```bash
-kubectl -n app get backup
+# Take a dump and store it OFF the cluster — not in the same bucket the app
+# uploads to, and not only on the volume you are protecting against.
+kubectl -n app exec postgres-1 -- pg_dump -Fc -d corners    > corners-$(date +%F).dump
+kubectl -n app exec postgres-1 -- pg_dump -Fc -d keycloakdb > keycloakdb-$(date +%F).dump
 ```
 
-Then delete the managed instance in the Scaleway console. Keep a final
-`pg_dump` of both databases somewhere off-cluster first.
+Consider keeping the managed instance running until real backups exist. It is
+the cheapest safety net you will ever have for this data.
 
 ## Rollback
 
@@ -174,14 +176,14 @@ the same password, and the rest is unaffected.
 **Cluster stuck in `Setting up primary`** — usually the PVC. Check
 `kubectl -n app describe pvc postgres-1` and that `sbs-default-retain` exists.
 
-**Backups failing** — check the bucket exists and is private, and that
-`db-creds` really carries `s3-access-key` / `s3-key`:
-`kubectl -n app get secret db-creds -o jsonpath='{.data}' | tr ',' '\n'`.
-
 ## What this setup does not give you
 
+- **No backups at all.** Deliberately deferred. Nothing is archived anywhere;
+  the retained volume is the only copy. Losing it loses the data.
+- **No point-in-time recovery.** There is no way to rewind to before a bad
+  migration, a bad delete, or corruption.
 - **No HA.** One instance on a one-node cluster. Node dies, database is down
-  until it comes back; the volume is retained, so data survives.
-- **Restores are manual.** Backups run daily and WAL ships continuously, so
-  point-in-time recovery is possible, but nothing is automatic. Practise a
-  restore into a scratch cluster before you need one for real.
+  until it comes back; the volume is retained, so data survives that case.
+
+Adding backups later is the Barman Cloud Plugin (chart `plugin-barman-cloud`),
+which injects a barman-cloud sidecar; the S3 settings map over unchanged.
