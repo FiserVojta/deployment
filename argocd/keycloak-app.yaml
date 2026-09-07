@@ -15,7 +15,7 @@ spec:
           # Keep the service name "keycloak-http" so the existing ingress matches.
           fullnameOverride: keycloak
 
-          replicas: 1
+          replicas: 0 # MAINTENANCE: database migration in progress
 
           image:
             repository: quay.io/keycloak/keycloak

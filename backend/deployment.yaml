@@ -4,7 +4,7 @@ metadata:
   name: api
   namespace: app
 spec:
-  replicas: 1
+  replicas: 0 # MAINTENANCE: database migration in progress
   selector:
     matchLabels: { app: api }
   template:
