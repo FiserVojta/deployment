@@ -15,7 +15,7 @@ spec:
           # Keep the service name "keycloak-http" so the existing ingress matches.
           fullnameOverride: keycloak
 
-          replicas: 0 # MAINTENANCE: database migration in progress
+          replicas: 1
 
           image:
             repository: quay.io/keycloak/keycloak
@@ -43,20 +43,18 @@ spec:
             - name: KC_DB
               value: postgres
             - name: KC_DB_URL_HOST
-              value: "172.16.0.5"
+              value: "postgres-rw.app.svc.cluster.local"
             - name: KC_DB_URL_PORT
               value: "5432"
             - name: KC_DB_URL_DATABASE
               value: "keycloakdb"
             - name: KC_DB_USERNAME
-              value: "keycloakadmin"
+              value: "keycloak"
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: keycloak-secrets
                   key: KC_DB_PASSWORD
-            - name: KC_DB_URL_PROPERTIES
-              value: "?sslmode=require"
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:

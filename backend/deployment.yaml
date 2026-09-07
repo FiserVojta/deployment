@@ -4,7 +4,7 @@ metadata:
   name: api
   namespace: app
 spec:
-  replicas: 0 # MAINTENANCE: database migration in progress
+  replicas: 1
   selector:
     matchLabels: { app: api }
   template:
@@ -20,12 +20,16 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            # In-cluster Postgres. sslmode=require is dropped because traffic
+            # stays inside the cluster and CNPG presents its own internal CA.
+            # currentSchema is kept exactly as it was: there is no "app" schema,
+            # so it resolves to public, which is where all the tables live.
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://172.16.0.5:5432/corners?sslmode=require&currentSchema=app,public"
+              value: "jdbc:postgresql://postgres-rw.app.svc.cluster.local:5432/corners?currentSchema=app,public"
             - name: SPRING_DATASOURCE_USERNAME
-              valueFrom: { secretKeyRef: { name: db-creds, key: db-username } }
+              valueFrom: { secretKeyRef: { name: postgres-app, key: username } }
             - name: DB_PASSWORD
-              valueFrom: { secretKeyRef: { name: db-creds, key: db-password } }
+              valueFrom: { secretKeyRef: { name: postgres-app, key: password } }
             - name: S3_ACCESS_KEY
               valueFrom: { secretKeyRef: { name: db-creds, key: s3-access-key } }
             - name: S3_KEY
