@@ -11,9 +11,12 @@ spec:
   primaryUpdateStrategy: unsupervised
 
   # PostGIS is a hard requirement: V0.1.0.09/10/27 create GEOMETRY(Point, 4326)
-  # columns. Pin the exact tag — never track a rolling tag for a database, since
-  # a major-version jump on restart cannot start against an existing PGDATA.
-  imageName: ghcr.io/cloudnative-pg/postgis:17-3.5-9
+  # columns. This is our own build (see images/postgis/) because upstream
+  # ghcr.io/cloudnative-pg/postgis is linux/amd64-only and these nodes are
+  # arm64. Pinned to a Postgres minor: never track a rolling tag for a
+  # database, since a major-version jump on restart cannot start against an
+  # existing PGDATA.
+  imageName: ghcr.io/fiservojta/coolcorners-postgis:17.9-3.6
 
   # Needed for the dump/restore cutover (and for CREATE EXTENSION during it).
   # Safe to set to false once the migration is finished.
