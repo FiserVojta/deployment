@@ -17,6 +17,10 @@ spec:
   # database, since a major-version jump on restart cannot start against an
   # existing PGDATA.
   imageName: ghcr.io/fiservojta/coolcorners-postgis:17.9-3.6
+  # The package is published by GITHUB_TOKEN and so is private; reuse the
+  # same ghcr pull secret the application deployments already use.
+  imagePullSecrets:
+    - name: ghcr-creds
 
   # Needed for the dump/restore cutover (and for CREATE EXTENSION during it).
   # Safe to set to false once the migration is finished.
