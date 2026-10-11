@@ -1,0 +1,27 @@
+# Serves the backend-generated sitemap at the site root, where search engines expect it.
+# Kept as its own Ingress because rewrite-target applies to every path of an Ingress.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-coolcorners-sitemap
+  namespace: app
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /api/public/sitemap.xml
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - coolcorners.org
+      secretName: coolcorners-app-tls
+  rules:
+    - host: coolcorners.org
+      http:
+        paths:
+          - path: /sitemap.xml
+            pathType: Exact
+            backend:
+              service:
+                name: api
+                port:
+                  number: 80
